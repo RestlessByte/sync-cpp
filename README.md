@@ -1,6 +1,6 @@
+---
 # Main Sync C++
-
-
+---
 ## English
 
 `main-sync` is a single C++ binary for bidirectional file synchronization between a local Linux machine and a remote Linux server over SSHFS.
