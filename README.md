@@ -1,5 +1,69 @@
 # Main Sync C++
 
+
+## English
+
+`main-sync` is a single C++ binary for bidirectional file synchronization between a local Linux machine and a remote Linux server over SSHFS.
+
+### Features
+
+- one interactive application; no Python runtime and no separate shell menu;
+- Russian and English UI;
+- configurable server host, SSH port, user, remote home and SSH key;
+- Ed25519 key generation and `ssh-copy-id` setup;
+- any number of synchronized folders and individual files;
+- multi-selection such as `1 2 4`, or `a` for all;
+- user-systemd daemon;
+- separate online/offline polling intervals;
+- lightweight metadata checks plus periodic SHA-256 verification;
+- local logging;
+- PostgreSQL backup using remote `pg_dump`;
+- dump retention;
+- lock protection against simultaneous manual and daemon syncs.
+
+### Synchronization rules
+
+1. A file present on only one side is copied to the missing side.
+2. If sizes differ, the **larger file is treated as the newer copy**.
+3. Equal sizes are compared using SHA-256.
+4. If hashes differ, newer `mtime` wins.
+5. Equal size + equal mtime + different hashes becomes a conflict.
+6. Files are never automatically deleted.
+
+> Important: under the “larger file wins” rule, a genuinely newer edit that made a file smaller can be overwritten by an older larger copy. This behavior is intentionally preserved from the current project logic.
+
+### Start
+
+```bash
+main-sync
+```
+
+Other commands:
+
+```bash
+main-sync --sync
+main-sync --dry-run
+main-sync --status
+main-sync --daemon
+main-sync --pg-backup
+main-sync --install-service
+main-sync --config
+```
+
+### Paths
+
+- source: `~/main/i/backubserver/main-sync.cpp`
+- binary: `~/main/i/backubserver/main-sync`
+- command: `~/.local/bin/main-sync`
+- configuration: `~/.config/main-sync/config.ini`
+- log: `~/.local/state/main-sync/main-sync.log`
+- SSHFS mount: `~/.cache/main-sync-remote`
+- systemd unit: `~/.config/systemd/user/main-sync.service`
+
+### PostgreSQL
+
+`pg_dump` must be installed on the remote server. The program supports running it as the SSH account or as `postgres` using non-interactive `sudo -n`. Database passwords are not stored in `config.ini`.
+
 ## Русский
 
 `main-sync` — один C++-бинарник для двусторонней синхронизации файлов между локальным Linux-компьютером и удалённым Linux-сервером через SSHFS.
@@ -115,66 +179,4 @@ sudo loginctl enable-linger "$USER"
 
 ---
 
-## English
-
-`main-sync` is a single C++ binary for bidirectional file synchronization between a local Linux machine and a remote Linux server over SSHFS.
-
-### Features
-
-- one interactive application; no Python runtime and no separate shell menu;
-- Russian and English UI;
-- configurable server host, SSH port, user, remote home and SSH key;
-- Ed25519 key generation and `ssh-copy-id` setup;
-- any number of synchronized folders and individual files;
-- multi-selection such as `1 2 4`, or `a` for all;
-- user-systemd daemon;
-- separate online/offline polling intervals;
-- lightweight metadata checks plus periodic SHA-256 verification;
-- local logging;
-- PostgreSQL backup using remote `pg_dump`;
-- dump retention;
-- lock protection against simultaneous manual and daemon syncs.
-
-### Synchronization rules
-
-1. A file present on only one side is copied to the missing side.
-2. If sizes differ, the **larger file is treated as the newer copy**.
-3. Equal sizes are compared using SHA-256.
-4. If hashes differ, newer `mtime` wins.
-5. Equal size + equal mtime + different hashes becomes a conflict.
-6. Files are never automatically deleted.
-
-> Important: under the “larger file wins” rule, a genuinely newer edit that made a file smaller can be overwritten by an older larger copy. This behavior is intentionally preserved from the current project logic.
-
-### Start
-
-```bash
-main-sync
-```
-
-Other commands:
-
-```bash
-main-sync --sync
-main-sync --dry-run
-main-sync --status
-main-sync --daemon
-main-sync --pg-backup
-main-sync --install-service
-main-sync --config
-```
-
-### Paths
-
-- source: `~/main/i/backubserver/main-sync.cpp`
-- binary: `~/main/i/backubserver/main-sync`
-- command: `~/.local/bin/main-sync`
-- configuration: `~/.config/main-sync/config.ini`
-- log: `~/.local/state/main-sync/main-sync.log`
-- SSHFS mount: `~/.cache/main-sync-remote`
-- systemd unit: `~/.config/systemd/user/main-sync.service`
-
-### PostgreSQL
-
-`pg_dump` must be installed on the remote server. The program supports running it as the SSH account or as `postgres` using non-interactive `sudo -n`. Database passwords are not stored in `config.ini`.
 
